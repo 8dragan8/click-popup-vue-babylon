@@ -54,7 +54,7 @@ const scene = {
       createSkybox: false,
     });
 
-    this.modelUrl = "/3dModels/LUMEN_Heleel_DC_V24.glb";
+    this.modelUrl = "/3dModels/cropped_down_Louvre.glb";
 
     // scene.debugLayer.show();
     // scene.debugLayer.setAsActiveScene();
