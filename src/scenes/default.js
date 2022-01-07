@@ -16,7 +16,7 @@ import {
   // ShadowGenerator,
   // DirectionalLight
 } from "@babylonjs/core/Legacy/legacy";
-// import centerOfMeshesArray from "../methods/centerOfMeshesArray";
+import centerOfMeshesArray from "../methods/centerOfMeshesArray";
 const scene = {
   engine: null,
   scene: null,
@@ -56,8 +56,8 @@ const scene = {
 
     this.modelUrl = "/3dModels/cropped_down_Louvre.glb";
 
-    // scene.debugLayer.show();
-    // scene.debugLayer.setAsActiveScene();
+    scene.debugLayer.show();
+    scene.debugLayer.setAsActiveScene();
 
     let glbTask = babylonAssetManager.addMeshTask("glbTask", "", this.modelUrl);
 
@@ -76,9 +76,9 @@ const scene = {
 
     const camera = new ArcRotateCamera(
       "camera1",
-      1.69 * Math.PI,
-      0.4 * Math.PI,
-      300,
+      1.2 * Math.PI,
+      0.45 * Math.PI,
+      100,
       new Vector3.Zero(),
       scene
     );
@@ -96,8 +96,16 @@ const scene = {
     hemLight.intensity = 0.35;
 
     glbTask.onSuccess = (task) => {
-      // let meshes = task.loadedMeshes;
-      console.log("🚀 ~ file: default.js ~ line 137 ~ task", task);
+      let meshes = task.loadedMeshes;
+
+      let meshData = null;
+      for (let i = 0; i < meshes.length; i++) {
+        const mesh = meshes[i];
+        let meshName = mesh.name;
+        if (meshName == "1A_BODY_primitive0")
+          meshData = centerOfMeshesArray(mesh.parent.getChildren());
+      }
+      camera.setTarget(meshData);
     };
 
     this.renderLoop = engine.runRenderLoop(() => {
