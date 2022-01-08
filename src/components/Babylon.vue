@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { scene } from "../scenes/default";
+import BabylonApp from "../scenes/default";
 import handleResize from "../methods/resize";
 
 export default {
@@ -25,7 +25,6 @@ export default {
   },
 
   mounted() {
-    scene.destroyScene();
     this.babylonCanvas = this.$refs.babylonCanvas;
 
     window.addEventListener("resize", () => {
@@ -35,16 +34,16 @@ export default {
     this.canvasSize = handleResize();
 
     if (this.babylonCanvas) {
-      scene.createScene(this.babylonCanvas);
+      new BabylonApp(this.babylonCanvas);
     }
   },
   updated() {
-    if (this.babylonCanvas) {
-      scene.updateScene(this.babylonCanvas);
-    }
+    // if (this.babylonCanvas) {
+    //   // scene.updateScene(this.babylonCanvas);
+    // }
   },
   beforeUnmount() {
-    scene.destroyScene();
+    // scene.destroyScene();
     window.removeEventListener("resize", handleResize);
   },
 };

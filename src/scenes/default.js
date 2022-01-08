@@ -2,7 +2,6 @@ import "@babylonjs/loaders/glTF";
 import {
   Engine,
   Scene,
-  AssetsManager,
   ArcRotateCamera,
   Vector3,
   // CubeTexture,
@@ -11,79 +10,55 @@ import {
   // Texture,
   // FreeCamera,
   // PBRMaterial,
-  Color3,
+  // Color3,
   HemisphericLight,
   // ShadowGenerator,
   // DirectionalLight
 } from "@babylonjs/core/Legacy/legacy";
 import centerOfMeshesArray from "../methods/centerOfMeshesArray";
-const scene = {
-  engine: null,
-  scene: null,
-  renderLoop: null,
-  modelUrl: null,
+import Window from "./window";
+import { AppAssets } from "./AppAssets";
 
-  destroyScene: function () {
-    // if (this.scene) this.scene.debugLayer.hide();
-    if (this.engine) this.engine.stopRenderLoop();
-    this.engine = null;
-    this.scene = null;
-    this.renderLoop = null;
-    this.modelUrl = null;
-  },
+export default class BabylonApp {
+  constructor(canvas) {
+    this._engine = null;
+    this._scene = null;
+    this._camera = null;
+    this._renderLoop = null;
+    this._canvas = canvas;
 
-  updateScene: function (canvas, modelUrl) {
-    if (modelUrl != null) {
-      if (this.modelUrl != modelUrl.href) {
-        this.destroyScene();
-        this.createScene(canvas, modelUrl);
-      }
-    }
-  },
-  createScene: function (canvas) {
-    const engine = new Engine(canvas);
-    const scene = new Scene(engine);
-    const babylonAssetManager = new AssetsManager(scene);
+    this._window = null;
 
-    this.engine = engine;
-    this.scene = scene;
-    this.scene.clearColor = new Color3.Black();
+    this._engine = new Engine(this._canvas);
+    this._scene = new Scene(this._engine);
+    this._babylonAssetManager = new AppAssets(this._scene, this._engine);
 
-    this.scene.createDefaultEnvironment({
+    // this._scene.clearColor = new Color3.Black();
+
+    this._scene.createDefaultEnvironment({
       createGround: false,
       createSkybox: false,
     });
 
-    this.modelUrl = "/3dModels/cropped_down_Louvre.glb";
+    this._createCamera();
 
-    scene.debugLayer.show();
-    scene.debugLayer.setAsActiveScene();
+    let hemLight = new HemisphericLight("hem01", Vector3.Up(), this._scene);
+    hemLight.intensity = 0.35;
 
-    let glbTask = babylonAssetManager.addMeshTask("glbTask", "", this.modelUrl);
-
-    let assetManager = babylonAssetManager.load();
-
-    babylonAssetManager.onFinish = (task) => {
-      switch (task[0]._isCompleted) {
-        case true:
-          console.log(`Success loading:`, task[0], assetManager);
-          break;
-        case false:
-          console.log(`Error loading:`, task[0]._errorObject.message);
-          break;
-      }
-    };
-
+    this._addKeyDownListener();
+    this._loadAssets();
+  }
+  _createCamera() {
     const camera = new ArcRotateCamera(
       "camera1",
       1.2 * Math.PI,
       0.45 * Math.PI,
       100,
       new Vector3.Zero(),
-      scene
+      this._scene
     );
     camera.setTarget(Vector3.Zero());
-    camera.attachControl(canvas, true);
+    camera.attachControl(this._canvas, true);
 
     camera.maxZ = 10000;
     camera.minZ = 0.1;
@@ -91,27 +66,49 @@ const scene = {
     // camera.lowerBetaLimit = 0;
     // camera.upperBetaLimit = Math.PI *2;
     camera.wheelDeltaPercentage = 0.01;
+    this._camera = camera;
+  }
 
-    let hemLight = new HemisphericLight("hem01", Vector3.Up(), scene);
-    hemLight.intensity = 0.35;
+  _loadAssets() {
+    this._babylonAssetManager._addTaskOnSuccess((task) =>
+      this._onLoadedGLB(task)
+    );
+    this._babylonAssetManager.load();
+  }
 
-    glbTask.onSuccess = (task) => {
-      let meshes = task.loadedMeshes;
+  _toggleInspector() {
+    if (this._scene.debugLayer.isVisible()) {
+      this._scene.debugLayer.hide();
+    } else {
+      this._scene.debugLayer.show();
+    }
+  }
 
-      let meshData = null;
-      for (let i = 0; i < meshes.length; i++) {
-        const mesh = meshes[i];
-        let meshName = mesh.name;
-        if (meshName == "1A_BODY_primitive0")
-          meshData = centerOfMeshesArray(mesh.parent.getChildren());
+  _addKeyDownListener() {
+    window.addEventListener("keydown", (e) => {
+      // hide/show the Inspector
+      // Shift+Ctrl+Alt+I
+      if (e.shiftKey && e.ctrlKey && e.altKey && e.key === "I") {
+        this._toggleInspector();
       }
-      camera.setTarget(meshData);
-    };
-
-    this.renderLoop = engine.runRenderLoop(() => {
-      scene.render();
     });
-  },
-};
+  }
+  _onLoadedGLB(task) {
+    let meshes = task.loadedMeshes;
 
-export { scene };
+    let meshData = null;
+    for (let i = 0; i < meshes.length; i++) {
+      const mesh = meshes[i];
+      let meshName = mesh.name;
+      if (meshName == "1A_BODY_primitive0")
+        meshData = centerOfMeshesArray(mesh.parent.getChildren());
+      if (meshName == "1A_4044_glazing") {
+        this._window = new Window(this._scene, mesh);
+      }
+    }
+    this._camera.setTarget(meshData);
+    this._scene.onPointerUp = () => {
+      this._window._toggleMaterials();
+    };
+  }
+}
