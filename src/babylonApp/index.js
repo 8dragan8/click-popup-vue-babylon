@@ -31,7 +31,7 @@ export default class BabylonApp {
 
     this._engine = new Engine(this._canvas);
     this._scene = new Scene(this._engine);
-    this._babylonAssetManager = new AppAssets(this._scene, this._engine);
+    this._babylonAssetManager = new AppAssets(this._scene);
 
     // this._scene.clearColor = new Color3.Black();
 

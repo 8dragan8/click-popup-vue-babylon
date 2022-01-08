@@ -1,13 +1,16 @@
-import { AssetsManager } from "@babylonjs/core/Legacy/legacy";
+import { AssetsManager, MeshAssetTask } from "@babylonjs/core/Legacy/legacy";
 
 export class AppAssets extends AssetsManager {
-  constructor(scene, engine) {
+  constructor(scene) {
     super(scene);
-    this._engine = engine;
-    this._scene = scene;
     this._modelUrl = "/3dModels/cropped_down_Louvre.glb";
 
-    this._glbTask = this.addMeshTask("glbTask", "", this._modelUrl);
+    this._glbTask = new MeshAssetTask("glbTask", "", this._modelUrl);
+    this._tasks.push(this._glbTask);
+    console.log(
+      "🚀 ~ file: AppAssets.js ~ line 12 ~ AppAssets ~ constructor ~ this",
+      this
+    );
   }
 
   onFinish(task) {
@@ -21,7 +24,7 @@ export class AppAssets extends AssetsManager {
             "🚀 ~ file: default.js ~ line 36 ~ AppAssets ~ task",
             task
           );
-          this._engine.runRenderLoop(() => {
+          this._scene._engine.runRenderLoop(() => {
             this._scene.render();
           });
         }
@@ -32,13 +35,19 @@ export class AppAssets extends AssetsManager {
     }
   }
   onProgress(remainingCount, totalCount) {
-    console.log(
+    this._scene._engine.loadingUIText =
       "We are loading the scene. " +
-        remainingCount +
-        " out of " +
-        totalCount +
-        " items still need to be loaded."
-    );
+      remainingCount +
+      " out of " +
+      totalCount +
+      " items still need to be loaded.";
+    // console.log(
+    //   "We are loading the scene. " +
+    //     remainingCount +
+    //     " out of " +
+    //     totalCount +
+    //     " items still need to be loaded."
+    // );
   }
 
   _addTaskOnSuccess(cb) {
