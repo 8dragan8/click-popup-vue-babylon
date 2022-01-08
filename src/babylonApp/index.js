@@ -2,26 +2,16 @@ import "@babylonjs/loaders/glTF";
 import {
   Engine,
   Scene,
-  ArcRotateCamera,
   Vector3,
-  BoundingInfo,
-  CubeTexture,
   MeshBuilder,
-  StandardMaterial,
-  Texture,
-  FreeCamera,
-  PBRMaterial,
-  Color3,
   HemisphericLight,
-  ShadowGenerator,
-  DirectionalLight,
 } from "@babylonjs/core/Legacy/legacy";
 import centerOfMeshesArray from "../methods/centerOfMeshesArray";
 import MouseHandler from "../methods/MouseHandler";
 import findMeshCenter from "../methods/findMeshCenter";
-import moveCamera from "@b/animations/AnimaterPointToPoint";
 
 import Window from "@bMesh/window";
+import MainArcCamera from "@bMesh/MainArcCamera";
 import { AppAssets } from "@bHelper/AppAssets";
 
 export default class BabylonApp {
@@ -45,33 +35,13 @@ export default class BabylonApp {
       createSkybox: false,
     });
 
-    this._createCamera();
+    this._camera = new MainArcCamera(this._scene, this._canvas);
 
     let hemLight = new HemisphericLight("hem01", Vector3.Up(), this._scene);
     hemLight.intensity = 0.35;
 
     this._addKeyDownListener();
     this._loadAssets();
-  }
-  _createCamera() {
-    const camera = new ArcRotateCamera(
-      "camera1",
-      1.2 * Math.PI,
-      0.45 * Math.PI,
-      100,
-      new Vector3.Zero(),
-      this._scene
-    );
-    camera.setTarget(Vector3.Zero());
-    camera.attachControl(this._canvas, true);
-
-    camera.maxZ = 10000;
-    camera.minZ = 0.1;
-    camera.upperRadiusLimit = 10000;
-    // camera.lowerBetaLimit = 0;
-    // camera.upperBetaLimit = Math.PI *2;
-    camera.wheelDeltaPercentage = 0.01;
-    this._camera = camera;
   }
 
   _loadAssets() {
@@ -127,12 +97,7 @@ export default class BabylonApp {
     };
     this._onDblClick = () => {
       // this._camera.parent = this._window;
-      moveCamera(this._scene, {
-        alpha: 1 * Math.PI,
-        beta: 0.45 * Math.PI,
-        radius: 40,
-        target: cameraTarget,
-      });
+      this._camera._moveCamera(cameraTarget);
     };
 
     MouseHandler(this._scene, {

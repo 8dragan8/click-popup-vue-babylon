@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "~/*": [
+                "./src/*"
+            ],
+            "@bMat/*": [
+                "./src/babylonApp/materials/*"
+            ],
+            "@b/*": [
+                "./src/babylonApp/*"
+            ],
+            "@bMesh/*": [
+                "./src/babylonApp/meshes/*"
+            ],
+            "@bHelper/*": [
+                "./src/babylonApp/heleperClasses/*"
+            ]
+        }
+    },
+    "exclude": [
+        "node_modules",
+        ".nuxt",
+        "dist"
+    ]
+}
