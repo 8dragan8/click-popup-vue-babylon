@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import BabylonApp from "../scenes/default";
+import BabylonApp from "@b";
 import handleResize from "../methods/resize";
 
 export default {

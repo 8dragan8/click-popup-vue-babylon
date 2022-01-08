@@ -4,20 +4,20 @@ import {
   Scene,
   ArcRotateCamera,
   Vector3,
-  // CubeTexture,
-  // MeshBuilder,
-  // StandardMaterial,
-  // Texture,
-  // FreeCamera,
-  // PBRMaterial,
-  // Color3,
+  CubeTexture,
+  MeshBuilder,
+  StandardMaterial,
+  Texture,
+  FreeCamera,
+  PBRMaterial,
+  Color3,
   HemisphericLight,
-  // ShadowGenerator,
-  // DirectionalLight
+  ShadowGenerator,
+  DirectionalLight,
 } from "@babylonjs/core/Legacy/legacy";
 import centerOfMeshesArray from "../methods/centerOfMeshesArray";
-import Window from "./window";
-import { AppAssets } from "./AppAssets";
+import Window from "@bMesh/window";
+import { AppAssets } from "@bHelper/AppAssets";
 
 export default class BabylonApp {
   constructor(canvas) {
