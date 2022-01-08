@@ -4,6 +4,7 @@ import {
   Scene,
   ArcRotateCamera,
   Vector3,
+  BoundingInfo,
   CubeTexture,
   MeshBuilder,
   StandardMaterial,
@@ -16,6 +17,9 @@ import {
   DirectionalLight,
 } from "@babylonjs/core/Legacy/legacy";
 import centerOfMeshesArray from "../methods/centerOfMeshesArray";
+import moveCamera from "@b/animations/AnimaterPointToPoint";
+
+import findMeshCenter from "../methods/findMeshCenter";
 import Window from "@bMesh/window";
 import { AppAssets } from "@bHelper/AppAssets";
 
@@ -95,7 +99,7 @@ export default class BabylonApp {
   }
   _onLoadedGLB(task) {
     let meshes = task.loadedMeshes;
-
+    let cameraTarget = null;
     let meshData = null;
     for (let i = 0; i < meshes.length; i++) {
       const mesh = meshes[i];
@@ -104,11 +108,27 @@ export default class BabylonApp {
         meshData = centerOfMeshesArray(mesh.parent.getChildren());
       if (meshName == "1A_4044_glazing") {
         this._window = new Window(this._scene, mesh);
+
+        let centerSphere = new MeshBuilder.CreateSphere(
+          "centerSphere",
+          {},
+          this._scene
+        );
+
+        cameraTarget = findMeshCenter(mesh);
+        centerSphere.position = cameraTarget;
       }
     }
     this._camera.setTarget(meshData);
+
     this._scene.onPointerUp = () => {
       this._window._toggleMaterials();
+      moveCamera(this._scene, {
+        alpha: 1 * Math.PI,
+        beta: 0.45 * Math.PI,
+        radius: 40,
+        target: cameraTarget,
+      });
     };
   }
 }
