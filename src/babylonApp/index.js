@@ -17,9 +17,10 @@ import {
   DirectionalLight,
 } from "@babylonjs/core/Legacy/legacy";
 import centerOfMeshesArray from "../methods/centerOfMeshesArray";
+import MouseHandler from "../methods/MouseHandler";
+import findMeshCenter from "../methods/findMeshCenter";
 import moveCamera from "@b/animations/AnimaterPointToPoint";
 
-import findMeshCenter from "../methods/findMeshCenter";
 import Window from "@bMesh/window";
 import { AppAssets } from "@bHelper/AppAssets";
 
@@ -121,8 +122,11 @@ export default class BabylonApp {
     }
     this._camera.setTarget(meshData);
 
-    this._scene.onPointerUp = () => {
+    this._onClick = () => {
       this._window._toggleMaterials();
+    };
+    this._onDblClick = () => {
+      // this._camera.parent = this._window;
       moveCamera(this._scene, {
         alpha: 1 * Math.PI,
         beta: 0.45 * Math.PI,
@@ -130,5 +134,10 @@ export default class BabylonApp {
         target: cameraTarget,
       });
     };
+
+    MouseHandler(this._scene, {
+      onClick: this._onClick,
+      onDblClick: this._onDblClick,
+    });
   }
 }
