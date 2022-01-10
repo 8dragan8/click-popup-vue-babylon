@@ -25,4 +25,7 @@ export default class Window extends Mesh {
       this.material = this.defaultMaterial;
     }
   }
+  get CameraRotation() {
+    return this.absoluteRotationQuaternion.toEulerAngles();
+  }
 }

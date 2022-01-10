@@ -34,7 +34,7 @@ export default {
     this.canvasSize = handleResize();
 
     if (this.babylonCanvas) {
-      new BabylonApp(this.babylonCanvas);
+      this.bApp = new BabylonApp(this.babylonCanvas);
     }
   },
   updated() {

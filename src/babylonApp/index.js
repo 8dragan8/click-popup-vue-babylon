@@ -72,6 +72,7 @@ export default class BabylonApp {
     let meshes = task.loadedMeshes;
     let cameraTarget = null;
     let meshData = null;
+
     for (let i = 0; i < meshes.length; i++) {
       const mesh = meshes[i];
       let meshName = mesh.name;
@@ -96,8 +97,7 @@ export default class BabylonApp {
       this._window._toggleMaterials();
     };
     this._onDblClick = () => {
-      // this._camera.parent = this._window;
-      this._camera._moveCamera(cameraTarget);
+      this._camera._moveCamera(cameraTarget, this._window.CameraRotation);
     };
 
     MouseHandler(this._scene, {

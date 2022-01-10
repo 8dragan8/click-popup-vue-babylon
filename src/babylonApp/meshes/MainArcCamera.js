@@ -20,11 +20,11 @@ export default class MainArcCamera extends ArcRotateCamera {
 
     this.wheelDeltaPercentage = 0.01;
   }
-  _moveCamera(target) {
+  _moveCamera(target, vector) {
     moveCamera(this._scene, {
-      alpha: 1 * Math.PI,
-      beta: 0.45 * Math.PI,
-      radius: 40,
+      alpha: Math.abs(vector.z),
+      beta: Math.abs(vector.y),
+      radius: 10,
       target,
     });
   }
