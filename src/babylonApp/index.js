@@ -84,7 +84,7 @@ export default class BabylonApp {
       "🚀 ~ file: index.js ~ line 76 ~ BabylonApp ~ _onLoadedGLB ~ rootNode",
       rootNode
     );
-    let windowIndex = 3;
+    let windowIndex = 30;
 
     for (let i = 0; i < meshes.length; i++) {
       const mesh = meshes[i];
@@ -94,10 +94,10 @@ export default class BabylonApp {
         meshSort.isPool(mesh) ||
         meshSort.isWater(mesh)
       ) {
-        mesh.isVisible = false;
+        // mesh.isVisible = false;
         if (meshNameArray.includes("primitive0"))
           meshData = centerOfMeshesArray(mesh.parent.getChildren());
-      } else if (meshSort.isWindow(mesh) && i < 3) {
+      } else if (meshSort.isWindow(mesh)) {
         let newMesh = new Window(this._scene, mesh);
         this._windows.push(newMesh);
         // this._camera.setTarget(newMesh.meshCenter);
@@ -109,7 +109,7 @@ export default class BabylonApp {
     console.log(meshes[0].getHierarchyBoundingVectors(true, false));
 
     // this._camera.parent = rootNode;
-    // this._camera.setTarget(meshData);
+    this._camera.setTarget(meshData);
     let interactiveWindow = this._windows[windowIndex];
 
     this._onClick = () => {
@@ -123,9 +123,9 @@ export default class BabylonApp {
       );
     };
 
-    // MouseHandler(this._scene, {
-    //   onClick: this._onClick,
-    //   onDblClick: this._onDblClick,
-    // });
+    MouseHandler(this._scene, {
+      onClick: this._onClick,
+      onDblClick: this._onDblClick,
+    });
   }
 }
