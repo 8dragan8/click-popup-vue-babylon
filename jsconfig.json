@@ -16,6 +16,9 @@
             ],
             "@bHelper/*": [
                 "./src/babylonApp/heleperClasses/*"
+            ],
+            "@bMethods/*": [
+                "./src/methods/*"
             ]
         }
     },

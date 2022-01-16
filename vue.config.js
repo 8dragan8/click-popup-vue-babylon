@@ -15,5 +15,9 @@ module.exports = {
       "@bHelper",
       path.resolve(__dirname, "./src/babylonApp/heleperClasses")
     );
+    config.resolve.alias.set(
+      "@bMethods",
+      path.resolve(__dirname, "./src/methods")
+    );
   },
 };
