@@ -3,12 +3,13 @@ import {
   Engine,
   Scene,
   Vector3,
-  MeshBuilder,
   HemisphericLight,
+  AxesViewer,
 } from "@babylonjs/core/Legacy/legacy";
 import centerOfMeshesArray from "../methods/centerOfMeshesArray";
 import MouseHandler from "../methods/MouseHandler";
-import findMeshCenter from "../methods/findMeshCenter";
+import meshSort from "../methods/meshSort";
+import RegisterMaterials from "@bMat";
 
 import Window from "@bMesh/window";
 import MainArcCamera from "@bMesh/MainArcCamera";
@@ -22,7 +23,7 @@ export default class BabylonApp {
     this._renderLoop = null;
     this._canvas = canvas;
 
-    this._window = null;
+    this._windows = [];
 
     this._engine = new Engine(this._canvas);
     this._scene = new Scene(this._engine);
@@ -34,12 +35,13 @@ export default class BabylonApp {
       createGround: false,
       createSkybox: false,
     });
+    new AxesViewer(this._scene, 10);
 
     this._camera = new MainArcCamera(this._scene, this._canvas);
 
     let hemLight = new HemisphericLight("hem01", Vector3.Up(), this._scene);
     hemLight.intensity = 0.35;
-
+    RegisterMaterials(this._scene);
     this._addKeyDownListener();
     this._loadAssets();
   }
@@ -70,39 +72,60 @@ export default class BabylonApp {
   }
   _onLoadedGLB(task) {
     let meshes = task.loadedMeshes;
-    let cameraTarget = null;
     let meshData = null;
+
+    let rootAxes = new AxesViewer(this._scene, 5);
+
+    let rootNode = this._scene.getNodeByID("__root__");
+    rootAxes.xAxis.parent = rootNode;
+    rootAxes.yAxis.parent = rootNode;
+    rootAxes.zAxis.parent = rootNode;
+    console.log(
+      "🚀 ~ file: index.js ~ line 76 ~ BabylonApp ~ _onLoadedGLB ~ rootNode",
+      rootNode
+    );
+    let windowIndex = 3;
 
     for (let i = 0; i < meshes.length; i++) {
       const mesh = meshes[i];
-      let meshName = mesh.name;
-      if (meshName == "1A_BODY_primitive0")
-        meshData = centerOfMeshesArray(mesh.parent.getChildren());
-      if (meshName == "1A_4044_glazing") {
-        this._window = new Window(this._scene, mesh);
-
-        let centerSphere = new MeshBuilder.CreateSphere(
-          "centerSphere",
-          {},
-          this._scene
-        );
-
-        cameraTarget = findMeshCenter(mesh);
-        centerSphere.position = cameraTarget;
+      let meshNameArray = mesh.name.split("_");
+      if (
+        meshSort.isBody(mesh) ||
+        meshSort.isPool(mesh) ||
+        meshSort.isWater(mesh)
+      ) {
+        mesh.isVisible = false;
+        if (meshNameArray.includes("primitive0"))
+          meshData = centerOfMeshesArray(mesh.parent.getChildren());
+      } else if (meshSort.isWindow(mesh) && i < 3) {
+        let newMesh = new Window(this._scene, mesh);
+        this._windows.push(newMesh);
+        // this._camera.setTarget(newMesh.meshCenter);
+      } else if (meshSort.isWindow(mesh)) {
+        mesh.dispose();
       }
+      // mesh.parent = null;
     }
-    this._camera.setTarget(meshData);
+    console.log(meshes[0].getHierarchyBoundingVectors(true, false));
+
+    // this._camera.parent = rootNode;
+    // this._camera.setTarget(meshData);
+    let interactiveWindow = this._windows[windowIndex];
 
     this._onClick = () => {
-      this._window._toggleMaterials();
+      interactiveWindow._toggleMaterials();
     };
     this._onDblClick = () => {
-      this._camera._moveCamera(cameraTarget, this._window.CameraRotation);
+      // interactiveWindow._addSphereToTheCenter();
+      this._camera._moveCamera(
+        interactiveWindow.meshCenter,
+        interactiveWindow.CameraRotation
+      );
     };
 
-    MouseHandler(this._scene, {
-      onClick: this._onClick,
-      onDblClick: this._onDblClick,
-    });
+    // MouseHandler(this._scene, {
+    //   onClick: this._onClick,
+    //   onDblClick: this._onDblClick,
+    // });
   }
 }
