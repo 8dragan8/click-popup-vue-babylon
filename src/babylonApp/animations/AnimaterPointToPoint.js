@@ -7,7 +7,7 @@ const LOOP_MODE = false;
 const FROM_FRAME = 0;
 const TO_FRAME = 200;
 
-function createAnimation({ property, from, to }) {
+function createAnimation({ property, from, to, startAt, stopAt }) {
   const ease = new CubicEase();
   ease.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
 
@@ -19,11 +19,11 @@ function createAnimation({ property, from, to }) {
   );
   animation.setKeys([
     {
-      frame: FROM_FRAME,
+      frame: startAt * FRAMES_PER_SECOND,
       value: from,
     },
     {
-      frame: TO_FRAME,
+      frame: stopAt * FRAMES_PER_SECOND,
       value: to,
     },
   ]);
@@ -34,38 +34,56 @@ function createAnimation({ property, from, to }) {
 export default function (scene, { radius, alpha, beta, target }) {
   const camera = scene.activeCamera;
   camera.animations = [
-    // createAnimation({
-    //   property: "radius",
-    //   from: camera.radius,
-    //   to: radius,
-    // }),
+    createAnimation({
+      property: "radius",
+      from: camera.radius,
+      to: radius,
+      startAt: 10,
+      stopAt: 14,
+    }),
     createAnimation({
       property: "beta",
       from: camera.beta,
       to: beta,
+      startAt: 13,
+      stopAt: 14,
     }),
     createAnimation({
       property: "alpha",
       from: camera.alpha,
       to: alpha,
+      startAt: 0,
+      stopAt: 2,
     }),
     createAnimation({
       property: "target.x",
       from: camera.target.x,
       to: target.x,
+      startAt: 0,
+      stopAt: 1,
     }),
     createAnimation({
       property: "target.y",
       from: camera.target.y,
       to: target.y,
+      startAt: 0,
+      stopAt: 1,
     }),
     createAnimation({
       property: "target.z",
       from: camera.target.z,
       to: target.z,
+      startAt: 0,
+      stopAt: 1,
     }),
   ];
   console.log("🚀 ~ file: AnimaterPointToPoint.js ~ line 37 ~ camera", camera);
 
-  scene.beginAnimation(camera, FROM_FRAME, TO_FRAME, LOOP_MODE, SPEED_RATIO);
+  scene.beginAnimation(
+    camera,
+    FROM_FRAME,
+    14 * FRAMES_PER_SECOND,
+    LOOP_MODE,
+    SPEED_RATIO
+  );
 }
