@@ -21,6 +21,15 @@ export default class MainArcCamera extends ArcRotateCamera {
     this.wheelDeltaPercentage = 0.01;
   }
   _moveCamera(target, vector) {
+    console.log(
+      "🚀 ~ file: MainArcCamera.js ~ line 24 ~ MainArcCamera ~ _moveCamera ~ target",
+      target
+    );
+    console.log(
+      "🚀 ~ file: MainArcCamera.js ~ line 24 ~ MainArcCamera ~ _moveCamera ~ vector",
+      vector
+    );
+
     moveCamera(this._scene, {
       alpha: Math.abs(vector.z),
       beta: Math.abs(vector.y),

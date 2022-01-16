@@ -5,6 +5,7 @@ import {
   Vector3,
   HemisphericLight,
   AxesViewer,
+  MeshBuilder,
 } from "@babylonjs/core/Legacy/legacy";
 import centerOfMeshesArray from "../methods/centerOfMeshesArray";
 import MouseHandler from "../methods/MouseHandler";
@@ -28,6 +29,14 @@ export default class BabylonApp {
     this._engine = new Engine(this._canvas);
     this._scene = new Scene(this._engine);
     this._babylonAssetManager = new AppAssets(this._scene);
+
+    this._pickSphere = null;
+
+    this._currentHoveredMesh = null;
+    this._lastHoveredMesh = null;
+
+    this._currentSelectedMesh = null;
+    this._lastSelectedMesh = null;
 
     // this._scene.clearColor = new Color3.Black();
 
@@ -106,26 +115,133 @@ export default class BabylonApp {
       }
       // mesh.parent = null;
     }
-    console.log(meshes[0].getHierarchyBoundingVectors(true, false));
+    // console.log(meshes[0].getHierarchyBoundingVectors(true, false));
 
     // this._camera.parent = rootNode;
     this._camera.setTarget(meshData);
-    let interactiveWindow = this._windows[windowIndex];
 
     this._onClick = () => {
-      interactiveWindow._toggleMaterials();
+      // interactiveWindow._toggleMaterials();
+      this._handleSuiteSelect();
     };
     this._onDblClick = () => {
+      this._handleSuiteSelect();
       // interactiveWindow._addSphereToTheCenter();
-      this._camera._moveCamera(
-        interactiveWindow.meshCenter,
-        interactiveWindow.CameraRotation
-      );
+      if (this._currentHoveredMesh) {
+        let targetMesh = this._scene.getMeshByName(this._currentHoveredMesh);
+        if (targetMesh)
+          this._camera._moveCamera(
+            targetMesh.meshCenter,
+            targetMesh.CameraRotation
+          );
+      }
     };
+
+    this.handleSuiteHover();
 
     MouseHandler(this._scene, {
       onClick: this._onClick,
       onDblClick: this._onDblClick,
     });
+  }
+  _handleSuiteSelect() {
+    this._lastSelectedMesh = this._currentSelectedMesh;
+    this._currentSelectedMesh = this._currentHoveredMesh;
+  }
+  handleSuiteHover() {
+    this._pickSphere = this.createPickSphere(1);
+    let usefulMesh = [];
+
+    this._scene.onBeforeRenderObservable.add(() => {
+      // usefulMesh = []
+      // suitesMeshesTest.getActive().forEach(mesh => {
+      //   this.onHoverLeaveChange(mesh)
+
+      //   if (pickSphere.intersectsMesh(mesh, true) && this.tileData[getMeshIdentifiers(mesh).tileDataKey])
+      //     usefulMesh.push(mesh)
+      // })
+
+      // if (usefulMesh.length > 1) {
+      //   let smallerMesh = usefulMesh.reduce((min, cur) => {
+      //     let curSize = cur.getBoundingInfo().valueOf().diagonalLength
+      //     let minSize = min.getBoundingInfo().valueOf().diagonalLength
+      //     return minSize > curSize ? cur : min
+      //   })
+      //   this.onHoverEnterChange(smallerMesh)
+      //   hoveredMesh = smallerMesh
+      // } else if (usefulMesh.length === 1) {
+      //   hoveredMesh = usefulMesh[0]
+      //   this.onHoverEnterChange(usefulMesh[0])
+      // } else {
+      //   hoveredMesh = null
+      // }
+
+      this._resetMeshesMaterialsOnHover();
+      this._resetMeshesMaterialsOnSelect();
+
+      let pickInfo = this._scene.pick(
+        this._scene.pointerX,
+        this._scene.pointerY
+      );
+      if (pickInfo.hit) {
+        this._pickSphere.position = pickInfo.pickedPoint;
+        if (pickInfo.pickedMesh) {
+          let pickedMesh = pickInfo.pickedMesh;
+          if (pickedMesh instanceof Window) {
+            // console.log("pickedMesh", pickInfo, pickedMesh.name);
+            if (this._currentHoveredMesh != pickedMesh.name) {
+              this._lastHoveredMesh = this._currentHoveredMesh;
+              this._currentHoveredMesh = pickedMesh.name;
+            }
+          } else {
+            this._lastHoveredMesh = this._currentHoveredMesh;
+            this._currentHoveredMesh = null;
+          }
+        } else {
+          this._lastHoveredMesh = this._currentHoveredMesh;
+          this._currentHoveredMesh = null;
+        }
+      } else {
+        this._lastHoveredMesh = this._currentHoveredMesh;
+        this._currentHoveredMesh = null;
+      }
+    });
+  }
+  _resetMeshesMaterialsOnHover() {
+    if (this._lastHoveredMesh) {
+      if (this._currentSelectedMesh != this._lastHoveredMesh) {
+        this._scene.getMeshByName(this._lastHoveredMesh)._resetMaterial();
+      }
+    }
+    if (this._currentHoveredMesh) {
+      if (this._currentSelectedMesh != this._currentHoveredMesh) {
+        this._scene
+          .getMeshByName(this._currentHoveredMesh)
+          ._highlightAvailable();
+      }
+    }
+  }
+  _resetMeshesMaterialsOnSelect() {
+    if (this._lastSelectedMesh) {
+      this._scene.getMeshByName(this._lastSelectedMesh)._resetMaterial();
+    }
+    if (this._currentSelectedMesh) {
+      this._scene
+        .getMeshByName(this._currentSelectedMesh)
+        ._highlightAvailable();
+    }
+  }
+  createPickSphere(diameter = 0.5) {
+    let sphere = MeshBuilder.CreateSphere(
+      "pick sphere",
+      { diameter },
+      this._scene
+    );
+    sphere.isPickable = false;
+    sphere.material = this._scene.getMaterialByName("RedMaterial");
+
+    sphere.material.backFaceCulling = false;
+
+    return sphere;
   }
 }

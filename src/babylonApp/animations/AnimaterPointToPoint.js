@@ -2,7 +2,7 @@ import { Animation } from "@babylonjs/core/Animations/animation";
 import { CubicEase, EasingFunction } from "@babylonjs/core/Animations/easing";
 
 const FRAMES_PER_SECOND = 60;
-const SPEED_RATIO = 4;
+const SPEED_RATIO = 1;
 const LOOP_MODE = false;
 const FROM_FRAME = 0;
 const TO_FRAME = 200;
@@ -34,11 +34,11 @@ function createAnimation({ property, from, to }) {
 export default function (scene, { radius, alpha, beta, target }) {
   const camera = scene.activeCamera;
   camera.animations = [
-    createAnimation({
-      property: "radius",
-      from: camera.radius,
-      to: radius,
-    }),
+    // createAnimation({
+    //   property: "radius",
+    //   from: camera.radius,
+    //   to: radius,
+    // }),
     createAnimation({
       property: "beta",
       from: camera.beta,

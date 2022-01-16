@@ -23,7 +23,7 @@ export default class Window extends Mesh {
     );
 
     this.material = this.defaultMaterial;
-    this._addLinesFromWorldZero();
+    // this._addLinesFromWorldZero();
     // this._addSphereAwayFromTheWorldCenter();
   }
   _highlightAvailable() {
