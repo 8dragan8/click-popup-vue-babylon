@@ -3,7 +3,7 @@ import { AssetsManager, MeshAssetTask } from "@babylonjs/core/Legacy/legacy";
 export class AppAssets extends AssetsManager {
   constructor(scene) {
     super(scene);
-    this._modelUrl = "/3dModels/cropped_down_Louvre.glb";
+    this._modelUrl = "/3dModels/Louvre_just_object.glb";
 
     this._glbTask = new MeshAssetTask("glbTask", "", this._modelUrl);
     this._tasks.push(this._glbTask);
@@ -17,7 +17,7 @@ export class AppAssets extends AssetsManager {
     switch (task[0]._isCompleted) {
       case true:
         if (task[0]._errorObject != undefined) {
-          console.log(`Error loading:`, task[0]._errorObject.message);
+          console.log(`Error loading:`, task[0]._errorObject.exception, task);
         } else {
           console.log(`Success loading:`, task[0]);
           console.log(
@@ -30,7 +30,7 @@ export class AppAssets extends AssetsManager {
         }
         break;
       case false:
-        console.log(`Error loading:`, task[0]._errorObject.message);
+        console.log(`Error loading:`, task[0]._errorObject.exception, task);
         break;
     }
   }
