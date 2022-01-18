@@ -138,9 +138,11 @@ export default class BabylonApp {
         let targetMesh = this._scene.getMeshByName(this._currentHoveredMesh);
         if (targetMesh) {
           // this._camera.parent = targetMesh;
+          this.onShowIframe("load-iframe");
           this._camera._moveCamera(
             targetMesh.meshCenter,
-            targetMesh.CameraRotation
+            targetMesh.CameraRotation,
+            this.onShowIframe
           );
         }
       }

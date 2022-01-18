@@ -1,17 +1,32 @@
 <template>
-  <div id="app"><Babylon /></div>
+  <div id="app">
+    <VirtualTour
+      src="http://localhost:91/gold_cc.html"
+      v-if="loadIframe"
+      :showIframe="showIframe"
+    />
+    <Babylon
+      @load-iframe="loadIframe = true"
+      @show-iframe="showIframe = true"
+    />
+  </div>
 </template>
 
 <script>
 import Babylon from "./components/Babylon.vue";
+import VirtualTour from "./components/VirtualTour.vue";
 
 export default {
   name: "App",
   components: {
     Babylon,
+    VirtualTour,
   },
   data() {
-    return {};
+    return {
+      showIframe: false,
+      loadIframe: false,
+    };
   },
 };
 </script>
