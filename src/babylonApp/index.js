@@ -6,6 +6,7 @@ import {
   HemisphericLight,
   AxesViewer,
   MeshBuilder,
+  MotionBlurPostProcess,
 } from "@babylonjs/core/Legacy/legacy";
 import centerOfMeshesArray from "../methods/centerOfMeshesArray";
 import MouseHandler from "../methods/MouseHandler";
@@ -38,7 +39,7 @@ export default class BabylonApp {
     this._currentSelectedMesh = null;
     this._lastSelectedMesh = null;
 
-    // this._scene.clearColor = new Color3.Black();
+    this._appStatus = "start";
 
     this._scene.createDefaultEnvironment({
       createGround: false,
@@ -53,6 +54,12 @@ export default class BabylonApp {
     RegisterMaterials(this._scene);
     this._addKeyDownListener();
     this._loadAssets();
+  }
+  _pauseApp() {
+    this._appStatus = "pause";
+  }
+  _startApp() {
+    this._appStatus = "play";
   }
 
   _loadAssets() {
@@ -129,11 +136,13 @@ export default class BabylonApp {
       // interactiveWindow._addSphereToTheCenter();
       if (this._currentHoveredMesh) {
         let targetMesh = this._scene.getMeshByName(this._currentHoveredMesh);
-        if (targetMesh)
+        if (targetMesh) {
+          // this._camera.parent = targetMesh;
           this._camera._moveCamera(
             targetMesh.meshCenter,
             targetMesh.CameraRotation
           );
+        }
       }
     };
 
@@ -149,33 +158,10 @@ export default class BabylonApp {
     this._currentSelectedMesh = this._currentHoveredMesh;
   }
   handleSuiteHover() {
-    this._pickSphere = this.createPickSphere(1);
+    // this._pickSphere = this.createPickSphere(1);
     let usefulMesh = [];
 
     this._scene.onBeforeRenderObservable.add(() => {
-      // usefulMesh = []
-      // suitesMeshesTest.getActive().forEach(mesh => {
-      //   this.onHoverLeaveChange(mesh)
-
-      //   if (pickSphere.intersectsMesh(mesh, true) && this.tileData[getMeshIdentifiers(mesh).tileDataKey])
-      //     usefulMesh.push(mesh)
-      // })
-
-      // if (usefulMesh.length > 1) {
-      //   let smallerMesh = usefulMesh.reduce((min, cur) => {
-      //     let curSize = cur.getBoundingInfo().valueOf().diagonalLength
-      //     let minSize = min.getBoundingInfo().valueOf().diagonalLength
-      //     return minSize > curSize ? cur : min
-      //   })
-      //   this.onHoverEnterChange(smallerMesh)
-      //   hoveredMesh = smallerMesh
-      // } else if (usefulMesh.length === 1) {
-      //   hoveredMesh = usefulMesh[0]
-      //   this.onHoverEnterChange(usefulMesh[0])
-      // } else {
-      //   hoveredMesh = null
-      // }
-
       this._resetMeshesMaterialsOnHover();
       this._resetMeshesMaterialsOnSelect();
 
@@ -184,12 +170,17 @@ export default class BabylonApp {
         this._scene.pointerY
       );
       if (pickInfo.hit) {
-        this._pickSphere.position = pickInfo.pickedPoint;
+        // this._pickSphere.position = pickInfo.pickedPoint;
         if (pickInfo.pickedMesh) {
           let pickedMesh = pickInfo.pickedMesh;
           if (pickedMesh instanceof Window) {
-            // console.log("pickedMesh", pickInfo, pickedMesh.name);
             if (this._currentHoveredMesh != pickedMesh.name) {
+              // console.log(
+              //   "pickedMesh",
+              //   pickInfo,
+              //   this._camera.position,
+              //   pickedMesh
+              // );
               this._lastHoveredMesh = this._currentHoveredMesh;
               this._currentHoveredMesh = pickedMesh.name;
             }

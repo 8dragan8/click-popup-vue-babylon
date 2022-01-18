@@ -9,7 +9,7 @@ export default class MainArcCamera extends ArcRotateCamera {
   constructor(scene, canvas) {
     super("MainArcCamera", ALPHA, BETA, RADIUS, Vector3.Zero(), scene);
     this.attachControl(canvas, true);
-
+    this._canvas = canvas;
     this.minZ = 0.1;
     this.maxZ = 10000;
 
@@ -29,12 +29,13 @@ export default class MainArcCamera extends ArcRotateCamera {
       "🚀 ~ file: MainArcCamera.js ~ line 24 ~ MainArcCamera ~ _moveCamera ~ vector",
       vector
     );
-
+    this.detachControl();
     moveCamera(this._scene, {
       alpha: Math.abs(vector.z),
       beta: Math.abs(vector.y),
       radius: 10,
       target,
     });
+    this.attachControl(this._canvas, true);
   }
 }

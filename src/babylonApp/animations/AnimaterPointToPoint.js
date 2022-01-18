@@ -1,3 +1,4 @@
+import { MotionBlurPostProcess } from "@babylonjs/core/Legacy/legacy";
 import { Animation } from "@babylonjs/core/Animations/animation";
 import { CubicEase, EasingFunction } from "@babylonjs/core/Animations/easing";
 
@@ -35,13 +36,6 @@ export default function (scene, { radius, alpha, beta, target }) {
   const camera = scene.activeCamera;
   camera.animations = [
     createAnimation({
-      property: "radius",
-      from: camera.radius,
-      to: radius,
-      startAt: 10,
-      stopAt: 14,
-    }),
-    createAnimation({
       property: "beta",
       from: camera.beta,
       to: beta,
@@ -76,14 +70,32 @@ export default function (scene, { radius, alpha, beta, target }) {
       startAt: 0,
       stopAt: 1,
     }),
+    createAnimation({
+      property: "radius",
+      from: camera.radius,
+      to: radius,
+      startAt: 10,
+      stopAt: 14,
+    }),
   ];
+  let mbPostProcess = new MotionBlurPostProcess("mb", scene, 1.0, camera);
+
   console.log("🚀 ~ file: AnimaterPointToPoint.js ~ line 37 ~ camera", camera);
 
-  scene.beginAnimation(
+  let animatable = scene.beginAnimation(
     camera,
     FROM_FRAME,
     14 * FRAMES_PER_SECOND,
     LOOP_MODE,
     SPEED_RATIO
   );
+
+  animatable.onAnimationEnd = () => {
+    console.log(
+      "🚀 ~ file: AnimaterPointToPoint.js ~ line 98 ~ camera",
+      camera._getFirstPostProcess()
+    );
+
+    camera.detachPostProcess(camera._getFirstPostProcess());
+  };
 }

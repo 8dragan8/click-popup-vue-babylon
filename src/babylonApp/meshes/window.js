@@ -25,9 +25,10 @@ export default class Window extends Mesh {
       "GlassAvailableMaterial"
     );
 
+    this._centerSphere = null;
     this.material = this.defaultMaterial;
     // this._calculateNormals();
-    // this._addSphereToTheCenter();
+    this._addSphereToTheCenter();
     // this._addLinesFromWorldZero();
     // this.createSurfaceSpheres();
   }
@@ -46,12 +47,12 @@ export default class Window extends Mesh {
   }
 
   _addSphereToTheCenter() {
-    let centerSphere = new MeshBuilder.CreateSphere(
+    this._centerSphere = new MeshBuilder.CreateSphere(
       `${this.name}centerSphere`,
       { diameter: 0.5 },
       this._scene
     );
-    centerSphere.position = this.meshCenter;
+    this._centerSphere.position = this.meshCenter;
     // centerSphere.parent = this.parent;
   }
   _addSpheres() {
@@ -126,9 +127,9 @@ export default class Window extends Mesh {
       );
       let line = [
         // Vector3.Zero(),
-        // this.meshCenter,
+        this.meshCenter,
         facetVector3,
-        facetNormal3,
+        // facetNormal3,
       ];
       let point2 = new Vector2(facetVector3.x, facetVector3.z);
 
@@ -169,15 +170,18 @@ export default class Window extends Mesh {
     );
     line.parent = this.parent;
   }
+
   get CameraRotation() {
     return this.absoluteRotationQuaternion.toEulerAngles();
   }
+
   get meshCenter() {
     let minAndMax = this.getHierarchyBoundingVectors(true, false);
     return new BoundingInfo(minAndMax.min, minAndMax.max).boundingBox
       .centerWorld;
     // return findMeshCenter(this);
   }
+
   createSurfaceSpheres() {
     let density = 150;
     let points = this.createSurfacePoints(density);
