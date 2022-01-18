@@ -1,14 +1,22 @@
 <template>
   <div id="app">
-    <div id="iframe-virtual-tour" class="iframe-container" v-show="loadIframe">
+    <div
+      id="iframe-virtual-tour"
+      class="iframe-container"
+      v-show="this.iframeObserver && this.iframeStatus != 'hidden'"
+    >
       <iframe
         :src="src"
-        class="mounted"
-        :class="{ loaded: iframeObserver && showIframe }"
+        class="show"
+        :class="{
+          fadeOut: iframeStatus == 'fadeOut',
+          fadeIn: iframeStatus == 'fadeIn',
+        }"
         ref="iframe"
         @load="onIframeLoaded"
         @unload="onIframeUnloaded"
       ></iframe>
+      <button @click="hideIframe">Back</button>
     </div>
     <canvas
       ref="babylonCanvas"
@@ -29,8 +37,8 @@ export default {
   components: { LoadingAnimation },
   data() {
     return {
+      iframeStatus: "hidden",
       iframeObserver: false,
-      showIframe: false,
       loadIframe: false,
       babylonCanvas: null,
       src: "",
@@ -52,11 +60,14 @@ export default {
 
     if (this.babylonCanvas) {
       this.bApp = new BabylonApp(this.babylonCanvas);
+      this.bApp.hideIframe = () => {
+        this.hideIframe();
+      };
       this.bApp.onShowIframe = (e) => {
         switch (e) {
           case "show-iframe":
             console.log("show-iframe");
-            this.showIframe = true;
+            this.showIframe();
 
             break;
           case "load-iframe":
@@ -70,16 +81,24 @@ export default {
     }
   },
   methods: {
+    hideIframe() {
+      this.iframeStatus = "fadeOut";
+      // setTimeout(() => {
+      //   this.iframeStatus = "hidden";
+      // }, 0.5 * 1000);
+    },
+    showIframe() {
+      this.iframeStatus = "fadeIn";
+      // setTimeout(() => {
+      //   this.iframeStatus = "show";
+      // }, 0.5 * 1000);
+    },
     onIframeLoaded() {
+      // this.iframeStatus == "loaded";
       this.iframeObserver = true;
-      //   alert("Iframe loaded");
     },
     onIframeUnloaded() {
       this.iframeObserver = false;
-      //   alert("Ifram unloaded");
-    },
-    closeDisclamer() {
-      this.isDisclamerRead = true;
     },
   },
 };
@@ -116,16 +135,31 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.mounted {
-  display: none;
-  width: 100%;
-  height: 100%;
-  transform: scale(0);
-}
-.loaded {
-  display: block;
-  animation: scaleUP 0.5s linear 0.5s forwards;
+  pointer-events: none;
+
+  button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 10px;
+    pointer-events: all;
+  }
+  iframe {
+    display: none;
+    width: 100%;
+    height: 100%;
+    transform: scale(0);
+    pointer-events: all;
+  }
+  .fadeOut {
+    animation: scaleUP 0.5s linear backwards;
+  }
+  .show {
+    display: block;
+  }
+  .fadeIn {
+    animation: scaleUP 0.5s linear forwards;
+  }
 }
 @keyframes scaleUP {
   from {
