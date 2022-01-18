@@ -15,15 +15,18 @@
       :width="canvasSize.width"
       :height="canvasSize.height"
     />
+    <LoadingAnimation v-show="loadIframe && !showIframe" />
   </div>
 </template>
 
 <script>
 import BabylonApp from "@b";
 import handleResize from "./methods/resize";
+import LoadingAnimation from "./components/LoadingAnimation.vue";
 
 export default {
   name: "App",
+  components: { LoadingAnimation },
   data() {
     return {
       iframeObserver: false,
