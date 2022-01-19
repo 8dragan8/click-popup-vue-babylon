@@ -9,7 +9,7 @@ import moveCamera from "@b/animations/AnimaterPointToPoint";
 const ALPHA = 1.2 * Math.PI;
 const BETA = 0.45 * Math.PI;
 const RADIUS = 100;
-const FRAMES_PER_SECOND = 60;
+const FRAMES_PER_SECOND = 30;
 const SPEED_RATIO = 1.5;
 const LOOP_MODE = false;
 const FROM_FRAME = 0;
@@ -98,7 +98,7 @@ export default class MainArcCamera extends ArcRotateCamera {
   _zoomINCameraAnimation() {
     console.log("zooInAnimations", this.animationStage);
     this.animationStage = 4;
-    let animatable = this._scene.beginDirectAnimation(
+    let animatable1 = this._scene.beginDirectAnimation(
       this,
       this._zooInAnimations,
       FROM_FRAME,
@@ -106,9 +106,9 @@ export default class MainArcCamera extends ArcRotateCamera {
       LOOP_MODE,
       SPEED_RATIO
     );
-    animatable.pause();
-    animatable.restart();
-    animatable.onAnimationEnd = () => {
+    animatable1.pause();
+    animatable1.restart();
+    animatable1.onAnimationEnd = () => {
       this.animationStage = 5;
       this.detachPostProcess(this._getFirstPostProcess());
       this.attachControl(this._canvas, true);
@@ -118,7 +118,7 @@ export default class MainArcCamera extends ArcRotateCamera {
     console.log("_positionCameraAnimation", this.animationStage);
 
     this.animationStage = 2;
-    let animatable = this._scene.beginDirectAnimation(
+    let animatable2 = this._scene.beginDirectAnimation(
       this,
       this._positioningAnimations,
       FROM_FRAME,
@@ -126,12 +126,12 @@ export default class MainArcCamera extends ArcRotateCamera {
       LOOP_MODE,
       SPEED_RATIO
     );
-    animatable.pause();
+    animatable2.pause();
     new MotionBlurPostProcess("mb", this._scene, 1.0, this);
     this.detachControl();
-    animatable.restart();
+    animatable2.restart();
 
-    animatable.onAnimationEnd = () => {
+    animatable2.onAnimationEnd = () => {
       this.animationStage = 3;
     };
   }
@@ -139,21 +139,21 @@ export default class MainArcCamera extends ArcRotateCamera {
     console.log("_reverseAllCameraAnimation", this.animationStage);
 
     this.animationStage = 7;
-    let animatable = this._scene.beginDirectAnimation(
+    let animatable3 = this._scene.beginDirectAnimation(
       this,
-      this._positioningAnimations,
-      4 * FRAMES_PER_SECOND,
+      this._zooInAnimations,
+      2 * FRAMES_PER_SECOND,
       FROM_FRAME,
       LOOP_MODE,
       SPEED_RATIO
     );
-    animatable.pause();
+    animatable3.pause();
 
     new MotionBlurPostProcess("mb", this._scene, 1.0, this);
     this.detachControl();
-    animatable.restart();
+    animatable3.restart();
 
-    animatable.onAnimationEnd = () => {
+    animatable3.onAnimationEnd = () => {
       this.animationStage = 8;
       this.detachPostProcess(this._getFirstPostProcess());
       this.attachControl(this._canvas, true);
