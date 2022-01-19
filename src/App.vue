@@ -65,10 +65,10 @@ export default {
           (theScene) => {
             if (this.src == "") {
               console.log("setUrl");
-              // this.src = "http://localhost:91/gold_cc.html";
-              this.src = "https://tour.renderator.com/gold_cc.html";
+              this.src = "http://localhost:91/gold_cc.html";
+              // this.src = "https://tour.renderator.com/gold_cc.html";
               this.onIframeLoadStart();
-              this.bApp._camera._createAnimations(target, cameraRotation);
+              this.bApp._camera._createAnimations(target, cameraRotation, 10);
             }
             if (this.iframeLoaded) {
               switch (this.bApp._camera.animationStage) {

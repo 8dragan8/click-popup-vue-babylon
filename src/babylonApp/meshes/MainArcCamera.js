@@ -30,7 +30,7 @@ export default class MainArcCamera extends ArcRotateCamera {
     this.animationStage = 0;
     this.wheelDeltaPercentage = 0.01;
   }
-  _createAnimations(target, vector, cb) {
+  _createAnimations(target, vector, targetRadius) {
     let moveToTarget = new Animation(
       "moveToTarget",
       "target",
@@ -75,10 +75,15 @@ export default class MainArcCamera extends ArcRotateCamera {
       Animation.ANIMATIONLOOPMODE_CONSTANT,
       false
     );
-    zoomIn.setKeys([
-      { frame: 0 * FRAMES_PER_SECOND, value: this.radius },
-      { frame: 2 * FRAMES_PER_SECOND, value: 10 },
-    ]);
+    let zoomInKeys = [];
+    zoomInKeys.push({ frame: 0 * FRAMES_PER_SECOND, value: this.radius });
+    if (this.radius < targetRadius)
+      zoomInKeys.push({
+        frame: 1 * FRAMES_PER_SECOND,
+        value: targetRadius + 10,
+      });
+    zoomInKeys.push({ frame: 2 * FRAMES_PER_SECOND, value: targetRadius });
+    zoomIn.setKeys(zoomInKeys);
 
     this._positioningAnimations = [
       moveToTarget,
