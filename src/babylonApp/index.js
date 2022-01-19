@@ -45,7 +45,7 @@ export default class BabylonApp {
       createGround: false,
       createSkybox: false,
     });
-    new AxesViewer(this._scene, 10);
+    // new AxesViewer(this._scene, 10);
 
     this._camera = new MainArcCamera(this._scene, this._canvas);
 
@@ -90,17 +90,17 @@ export default class BabylonApp {
     let meshes = task.loadedMeshes;
     let meshData = null;
 
-    let rootAxes = new AxesViewer(this._scene, 5);
+    // let rootAxes = new AxesViewer(this._scene, 5);
 
     let rootNode = this._scene.getNodeByID("__root__");
-    rootAxes.xAxis.parent = rootNode;
-    rootAxes.yAxis.parent = rootNode;
-    rootAxes.zAxis.parent = rootNode;
-    console.log(
-      "🚀 ~ file: index.js ~ line 76 ~ BabylonApp ~ _onLoadedGLB ~ rootNode",
-      rootNode
-    );
-    let windowIndex = 30;
+    // rootAxes.xAxis.parent = rootNode;
+    // rootAxes.yAxis.parent = rootNode;
+    // rootAxes.zAxis.parent = rootNode;
+    // console.log(
+    //   "🚀 ~ file: index.js ~ line 76 ~ BabylonApp ~ _onLoadedGLB ~ rootNode",
+    //   rootNode
+    // );
+    // let windowIndex = 30;
 
     for (let i = 0; i < meshes.length; i++) {
       const mesh = meshes[i];
@@ -138,12 +138,8 @@ export default class BabylonApp {
         let targetMesh = this._scene.getMeshByName(this._currentHoveredMesh);
         if (targetMesh) {
           // this._camera.parent = targetMesh;
-          this.onShowIframe("load-iframe");
-          this._camera._moveCamera(
-            targetMesh.meshCenter,
-            targetMesh.CameraRotation,
-            this.onShowIframe
-          );
+          // this.onShowIframe("load-iframe");
+          this.sweepInHandler(targetMesh.meshCenter, targetMesh.CameraRotation);
         }
       }
     };
@@ -161,7 +157,7 @@ export default class BabylonApp {
   }
   handleSuiteHover() {
     // this._pickSphere = this.createPickSphere(1);
-    let usefulMesh = [];
+    // let usefulMesh = [];
 
     this._scene.onBeforeRenderObservable.add(() => {
       this._resetMeshesMaterialsOnHover();

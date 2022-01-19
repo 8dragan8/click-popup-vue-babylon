@@ -28,7 +28,7 @@ export default class Window extends Mesh {
     this._centerSphere = null;
     this.material = this.defaultMaterial;
     // this._calculateNormals();
-    this._addSphereToTheCenter();
+    // this._addSphereToTheCenter();
     // this._addLinesFromWorldZero();
     // this.createSurfaceSpheres();
   }

@@ -27,10 +27,10 @@ export default class MainArcCamera extends ArcRotateCamera {
 
     // this.lowerBetaLimit = 0;
     // this.upperBetaLimit = Math.PI *2;
-
+    this.animationStage = 0;
     this.wheelDeltaPercentage = 0.01;
   }
-  _moveCamera(target, vector, cb) {
+  _createAnimations(target, vector, cb) {
     let moveToTarget = new Animation(
       "moveToTarget",
       "target",
@@ -80,41 +80,81 @@ export default class MainArcCamera extends ArcRotateCamera {
       { frame: 2 * FRAMES_PER_SECOND, value: 10 },
     ]);
 
-    // this.animations.push(
+    this._positioningAnimations = [
+      moveToTarget,
+      rotateToTargetBeta,
+      rotateToTargetAlpha,
+    ];
+    this.zooInAnimations = [zoomIn];
+    // console.log(
+    //   "animations",
     //   moveToTarget,
     //   rotateToTargetBeta,
     //   rotateToTargetAlpha,
     //   zoomIn
-    //   );
+    // );
+  }
 
+  _zoomINCameraAnimation() {
+    this.animationStage = 4;
     let animatable = this._scene.beginDirectAnimation(
       this,
-      [moveToTarget, rotateToTargetBeta, rotateToTargetAlpha, zoomIn],
+      this.zooInAnimations,
       FROM_FRAME,
-      4 * FRAMES_PER_SECOND,
-      false,
+      2 * FRAMES_PER_SECOND,
+      LOOP_MODE,
       SPEED_RATIO
     );
-    let mbPostProcess = new MotionBlurPostProcess("mb", this._scene, 1.0, this);
-    this.detachControl();
-
+    animatable.pause();
+    animatable.restart();
     animatable.onAnimationEnd = () => {
-      console.log(this);
-      cb("show-iframe");
+      console.log("_zoomINCameraAnimation");
+      this.animationStage = 5;
       this.detachPostProcess(this._getFirstPostProcess());
-
-      this.animations = [];
+      this.attachControl(this._canvas, true);
+      console.log(
+        "🚀 ~ file: MainArcCamera.js ~ line 115 ~ MainArcCamera ~ _zoomINCameraAnimation ~ this",
+        this
+      );
+    };
+  }
+  _positionCameraAnimation() {
+    this.animationStage = 2;
+    let animatable = this._scene.beginDirectAnimation(
+      this,
+      this._positioningAnimations,
+      FROM_FRAME,
+      2 * FRAMES_PER_SECOND,
+      LOOP_MODE,
+      SPEED_RATIO
+    );
+    animatable.pause();
+    new MotionBlurPostProcess("mb", this._scene, 1.0, this);
+    this.detachControl();
+    animatable.restart();
+    animatable.onAnimationEnd = () => {
+      this.animationStage = 3;
+      console.log("this.animationStage", this.animationStage);
+    };
+  }
+  _reverseAllCameraAnimation() {
+    this.animationStage = 7;
+    let animatable = this._scene.beginDirectAnimation(
+      this,
+      [...this.zooInAnimations, ...this._positioningAnimations],
+      4 * FRAMES_PER_SECOND,
+      FROM_FRAME,
+      LOOP_MODE,
+      SPEED_RATIO
+    );
+    animatable.pause();
+    new MotionBlurPostProcess("mb", this._scene, 1.0, this);
+    this.detachControl();
+    animatable.restart();
+    animatable.onAnimationEnd = () => {
+      this.animationStage = 8;
+      this.detachPostProcess(this._getFirstPostProcess());
       this.attachControl(this._canvas, true);
     };
-    animatable.onAnimationLoop = () => {
-      console.log("LOOP");
-    };
-
-    // moveCamera(this._scene, {
-    //   alpha: Math.abs(vector.z),
-    //   beta: Math.abs(vector.y),
-    //   radius: 10,
-    //   target,
-    // });
   }
 }
