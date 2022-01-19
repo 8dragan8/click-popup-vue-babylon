@@ -85,7 +85,7 @@ export default class MainArcCamera extends ArcRotateCamera {
       rotateToTargetBeta,
       rotateToTargetAlpha,
     ];
-    this.zooInAnimations = [zoomIn];
+    this._zooInAnimations = [zoomIn];
     // console.log(
     //   "animations",
     //   moveToTarget,
@@ -96,10 +96,11 @@ export default class MainArcCamera extends ArcRotateCamera {
   }
 
   _zoomINCameraAnimation() {
+    console.log("zooInAnimations", this.animationStage);
     this.animationStage = 4;
     let animatable = this._scene.beginDirectAnimation(
       this,
-      this.zooInAnimations,
+      this._zooInAnimations,
       FROM_FRAME,
       2 * FRAMES_PER_SECOND,
       LOOP_MODE,
@@ -108,17 +109,14 @@ export default class MainArcCamera extends ArcRotateCamera {
     animatable.pause();
     animatable.restart();
     animatable.onAnimationEnd = () => {
-      console.log("_zoomINCameraAnimation");
       this.animationStage = 5;
       this.detachPostProcess(this._getFirstPostProcess());
       this.attachControl(this._canvas, true);
-      console.log(
-        "🚀 ~ file: MainArcCamera.js ~ line 115 ~ MainArcCamera ~ _zoomINCameraAnimation ~ this",
-        this
-      );
     };
   }
   _positionCameraAnimation() {
+    console.log("_positionCameraAnimation", this.animationStage);
+
     this.animationStage = 2;
     let animatable = this._scene.beginDirectAnimation(
       this,
@@ -132,25 +130,29 @@ export default class MainArcCamera extends ArcRotateCamera {
     new MotionBlurPostProcess("mb", this._scene, 1.0, this);
     this.detachControl();
     animatable.restart();
+
     animatable.onAnimationEnd = () => {
       this.animationStage = 3;
-      console.log("this.animationStage", this.animationStage);
     };
   }
   _reverseAllCameraAnimation() {
+    console.log("_reverseAllCameraAnimation", this.animationStage);
+
     this.animationStage = 7;
     let animatable = this._scene.beginDirectAnimation(
       this,
-      [...this.zooInAnimations, ...this._positioningAnimations],
+      this._positioningAnimations,
       4 * FRAMES_PER_SECOND,
       FROM_FRAME,
       LOOP_MODE,
       SPEED_RATIO
     );
     animatable.pause();
+
     new MotionBlurPostProcess("mb", this._scene, 1.0, this);
     this.detachControl();
     animatable.restart();
+
     animatable.onAnimationEnd = () => {
       this.animationStage = 8;
       this.detachPostProcess(this._getFirstPostProcess());

@@ -149,9 +149,12 @@ export default {
     onIframeLoaded() {
       // this.iframeStatus == "loaded";
       console.log("🚀 ~ onIframeLoaded");
-      this.iframeLoaded = true;
-      this.showSpinner = false;
-      if (this.bApp) this.bApp._camera.animationStage = 1;
+      if (this.src != "") {
+        console.log("🚀 ~ onIframeLoaded-DA", this.src);
+        this.iframeLoaded = true;
+        this.showSpinner = false;
+        if (this.bApp) this.bApp._camera.animationStage = 1;
+      }
     },
     onIframeLoadStart() {
       console.log("🚀 ~ onIframeLoadStart");
