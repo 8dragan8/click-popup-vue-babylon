@@ -3,16 +3,13 @@
     <div id="iframe-virtual-tour" class="iframe-container">
       <iframe
         :src="src"
-        :class="{
-          fadeOut: iframeStatus == 'fadeOut',
-          fadeIn: iframeStatus == 'fadeIn',
-        }"
         ref="iframe"
         @load="onIframeLoaded"
         @unload="onIframeUnloaded"
         :style="iframeStyles"
+        v-if="src != ''"
       ></iframe>
-      <button @click="hideIframe">Back</button>
+      <button @click="hideIframe" v-if="showBackButton">Back</button>
     </div>
     <canvas
       ref="babylonCanvas"
@@ -33,13 +30,11 @@ export default {
   components: { LoadingAnimation },
   data() {
     return {
-      iframeStatus: "hidden",
       iframeLoaded: false,
       showSpinner: false,
-      loadIframe: false,
+      showBackButton: false,
       babylonCanvas: null,
       src: "",
-
       canvasSize: {
         width: 800,
         height: 800,
@@ -62,7 +57,9 @@ export default {
       this.bApp.sweepInHandler = (target, cameraRotation) => {
         let cameraRadius0 = 0;
         let cameraRadiusFinal = 10;
-        let iframeDuration = 10;
+        let radiusLength;
+        let cameraRadiusN;
+        let value;
 
         let observable = this.bApp._scene.onBeforeRenderObservable.add(
           (theScene) => {
@@ -73,59 +70,62 @@ export default {
               this.onIframeLoadStart();
               this.bApp._camera._createAnimations(target, cameraRotation);
             }
+            if (this.iframeLoaded) {
+              switch (this.bApp._camera.animationStage) {
+                case 1:
+                  this.bApp._camera._positionCameraAnimation();
 
-            if (this.iframeLoaded && this.bApp._camera.animationStage == 1) {
-              this.bApp._camera._positionCameraAnimation();
-            }
-            if (this.iframeLoaded && this.bApp._camera.animationStage == 2) {
-              //
-            }
-            if (this.iframeLoaded && this.bApp._camera.animationStage == 3) {
-              cameraRadius0 = this.bApp._camera.radius * 0.45;
-              this.bApp._camera._zoomINCameraAnimation();
-            }
-            if (this.iframeLoaded && this.bApp._camera.animationStage == 4) {
-              let radiusLength = cameraRadius0 - cameraRadiusFinal;
-              let cameraRadiusN = this.bApp._camera.radius;
+                  break;
+                case 2:
+                  break;
+                case 3:
+                  cameraRadius0 = this.bApp._camera.radius * 0.45;
+                  this.bApp._camera._zoomINCameraAnimation();
 
-              let value = 1 - cameraRadiusN / radiusLength;
+                  break;
+                case 4:
+                  radiusLength = cameraRadius0 - cameraRadiusFinal;
+                  cameraRadiusN = this.bApp._camera.radius;
 
-              this.iframeStyles = {
-                transform: `scale(${value})`,
-                opacity: value,
-              };
-            }
-            if (this.iframeLoaded && this.bApp._camera.animationStage == 5) {
-              this.iframeStyles = {
-                transform: `scale(${1})`,
-                opacity: 1,
-              };
-              // theScene.onBeforeRenderObservable.remove(observable);
-              // this.bApp._camera.animationStage = 0;
-            }
-            if (this.iframeLoaded && this.bApp._camera.animationStage == 6) {
-              this.bApp._camera._reverseAllCameraAnimation();
-            }
-            if (this.iframeLoaded && this.bApp._camera.animationStage == 7) {
-              let radiusLength = cameraRadius0 - cameraRadiusFinal;
-              let cameraRadiusN = this.bApp._camera.radius;
+                  value = 1 - cameraRadiusN / radiusLength;
 
-              let value = 1 - cameraRadiusN / radiusLength;
+                  this.iframeStyles = {
+                    transform: `scale(${value})`,
+                    opacity: value,
+                  };
+                  break;
+                case 5:
+                  this.iframeStyles = {
+                    transform: `scale(${1})`,
+                    opacity: 1,
+                  };
+                  break;
+                case 6:
+                  this.bApp._camera._reverseAllCameraAnimation();
 
-              this.iframeStyles = {
-                transform: `scale(${value})`,
-                opacity: value,
-              };
-            }
-            if (this.iframeLoaded && this.bApp._camera.animationStage == 8) {
-              this.iframeStyles = {
-                transform: `scale(${0})`,
-                opacity: 0,
-              };
-              theScene.onBeforeRenderObservable.remove(observable);
-              this.bApp._camera.animationStage = 0;
-              this.src = "";
-              this.iframeLoaded = false;
+                  break;
+                case 7:
+                  radiusLength = cameraRadius0 - cameraRadiusFinal;
+                  cameraRadiusN = this.bApp._camera.radius;
+
+                  value = 1 - cameraRadiusN / radiusLength;
+
+                  this.iframeStyles = {
+                    transform: `scale(${value})`,
+                    opacity: value,
+                  };
+                  break;
+                case 8:
+                  this.iframeStyles = {
+                    transform: `scale(${0})`,
+                    opacity: 0,
+                  };
+                  theScene.onBeforeRenderObservable.remove(observable);
+                  this.bApp._camera.animationStage = 0;
+                  this.src = "";
+                  this.iframeLoaded = false;
+                  break;
+              }
             }
           }
         );
@@ -134,31 +134,19 @@ export default {
   },
   methods: {
     hideIframe() {
-      // this.iframeStatus = "fadeOut";
-      // setTimeout(() => {
-      //   this.iframeStatus = "hidden";
-      // }, 0.5 * 1000);
+      this.showBackButton = false;
       if (this.bApp) this.bApp._camera.animationStage = 6;
     },
-    showIframe() {
-      this.iframeStatus = "fadeIn";
-      // setTimeout(() => {
-      //   this.iframeStatus = "show";
-      // }, 0.5 * 1000);
+    onIframeLoadStart() {
+      this.showSpinner = true;
     },
     onIframeLoaded() {
-      // this.iframeStatus == "loaded";
-      console.log("🚀 ~ onIframeLoaded");
       if (this.src != "") {
-        console.log("🚀 ~ onIframeLoaded-DA", this.src);
         this.iframeLoaded = true;
         this.showSpinner = false;
+        this.showBackButton = true;
         if (this.bApp) this.bApp._camera.animationStage = 1;
       }
-    },
-    onIframeLoadStart() {
-      console.log("🚀 ~ onIframeLoadStart");
-      this.showSpinner = true;
     },
     onIframeUnloaded() {
       console.log("onIframeUnloaded");
@@ -209,35 +197,12 @@ canvas {
     pointer-events: all;
   }
   iframe {
-    // display: none;
     width: 100%;
     height: 100%;
     transform: scale(0);
     pointer-events: all;
     opacity: 0;
   }
-  // .fadeOut {
-  //   display: block;
-  //   // transform: scale(0);
-  //   // opacity: 0;
-  //   animation-timing-function: linear;
-  //   animation-name: scaleUP;
-  //   animation-duration: 2s;
-  //   animation-delay: 0;
-  //   animation-direction: reverse;
-  // }
-  .show {
-  }
-  // .fadeIn {
-  //   // display: block;
-  //   // transform: scale(0);
-  //   // opacity: 0;
-  //   animation-timing-function: linear;
-  //   animation-name: scaleUP;
-  //   animation-duration: 2s;
-  //   animation-delay: 0;
-  //   animation-direction: normal;
-  // }
 }
 @keyframes scaleUP {
   from {
