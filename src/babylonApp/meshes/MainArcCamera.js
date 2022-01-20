@@ -9,7 +9,7 @@ import moveCamera from "@b/animations/AnimaterPointToPoint";
 const ALPHA = 1.2 * Math.PI;
 const BETA = 0.45 * Math.PI;
 const RADIUS = 100;
-const FRAMES_PER_SECOND = 30;
+const FRAMES_PER_SECOND = 60;
 const SPEED_RATIO = 1.5;
 const LOOP_MODE = false;
 const FROM_FRAME = 0;
@@ -77,12 +77,7 @@ export default class MainArcCamera extends ArcRotateCamera {
     );
     let zoomInKeys = [];
     zoomInKeys.push({ frame: 0 * FRAMES_PER_SECOND, value: this.radius });
-    if (this.radius < targetRadius)
-      zoomInKeys.push({
-        frame: 1 * FRAMES_PER_SECOND,
-        value: targetRadius + 10,
-      });
-    zoomInKeys.push({ frame: 2 * FRAMES_PER_SECOND, value: targetRadius });
+    zoomInKeys.push({ frame: 1 * FRAMES_PER_SECOND, value: targetRadius });
     zoomIn.setKeys(zoomInKeys);
 
     this._positioningAnimations = [
@@ -90,7 +85,31 @@ export default class MainArcCamera extends ArcRotateCamera {
       rotateToTargetBeta,
       rotateToTargetAlpha,
     ];
+
     this._zooInAnimations = [zoomIn];
+
+    if (this.radius < targetRadius) {
+      let zoomInJump = new Animation(
+        "zoomInJump",
+        "radius",
+        FRAMES_PER_SECOND,
+        Animation.ANIMATIONTYPE_FLOAT,
+        Animation.ANIMATIONLOOPMODE_CONSTANT,
+        false
+      );
+      let zoomInJumpKeys = [
+        {
+          frame: 3 * FRAMES_PER_SECOND,
+          value: this.radius,
+        },
+        {
+          frame: 4 * FRAMES_PER_SECOND,
+          value: this.radius + 20,
+        },
+      ];
+      zoomInJump.setKeys(zoomInJumpKeys);
+      this._positioningAnimations.push(zoomInJump);
+    }
     // console.log(
     //   "animations",
     //   moveToTarget,
@@ -100,25 +119,6 @@ export default class MainArcCamera extends ArcRotateCamera {
     // );
   }
 
-  _zoomINCameraAnimation() {
-    console.log("zooInAnimations", this.animationStage);
-    this.animationStage = 4;
-    let animatable1 = this._scene.beginDirectAnimation(
-      this,
-      this._zooInAnimations,
-      FROM_FRAME,
-      2 * FRAMES_PER_SECOND,
-      LOOP_MODE,
-      SPEED_RATIO
-    );
-    animatable1.pause();
-    animatable1.restart();
-    animatable1.onAnimationEnd = () => {
-      this.animationStage = 5;
-      this.detachPostProcess(this._getFirstPostProcess());
-      this.attachControl(this._canvas, true);
-    };
-  }
   _positionCameraAnimation() {
     console.log("_positionCameraAnimation", this.animationStage);
 
@@ -140,6 +140,25 @@ export default class MainArcCamera extends ArcRotateCamera {
       this.animationStage = 3;
     };
   }
+  _zoomINCameraAnimation() {
+    console.log("zooInAnimations", this.animationStage);
+    this.animationStage = 4;
+    let animatable1 = this._scene.beginDirectAnimation(
+      this,
+      this._zooInAnimations,
+      FROM_FRAME,
+      1 * FRAMES_PER_SECOND,
+      LOOP_MODE,
+      SPEED_RATIO
+    );
+    animatable1.pause();
+    animatable1.restart();
+    animatable1.onAnimationEnd = () => {
+      this.animationStage = 5;
+      this.detachPostProcess(this._getFirstPostProcess());
+      this.attachControl(this._canvas, true);
+    };
+  }
   _reverseAllCameraAnimation() {
     console.log("_reverseAllCameraAnimation", this.animationStage);
 
@@ -147,7 +166,7 @@ export default class MainArcCamera extends ArcRotateCamera {
     let animatable3 = this._scene.beginDirectAnimation(
       this,
       this._zooInAnimations,
-      2 * FRAMES_PER_SECOND,
+      1 * FRAMES_PER_SECOND,
       FROM_FRAME,
       LOOP_MODE,
       SPEED_RATIO

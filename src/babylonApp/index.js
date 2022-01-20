@@ -139,7 +139,7 @@ export default class BabylonApp {
         if (targetMesh) {
           // this._camera.parent = targetMesh;
           // this.onShowIframe("load-iframe");
-          this.sweepInHandler(targetMesh.meshCenter, targetMesh.CameraRotation);
+          this.sweepInHandler(targetMesh);
         }
       }
     };
@@ -154,6 +154,11 @@ export default class BabylonApp {
   _handleSuiteSelect() {
     this._lastSelectedMesh = this._currentSelectedMesh;
     this._currentSelectedMesh = this._currentHoveredMesh;
+    if (this._currentSelectedMesh) {
+      this.toggleOptionsSelector("open");
+    } else {
+      this.toggleOptionsSelector("close");
+    }
   }
   handleSuiteHover() {
     // this._pickSphere = this.createPickSphere(1);

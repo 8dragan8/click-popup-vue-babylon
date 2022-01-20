@@ -17,6 +17,13 @@
       :height="canvasSize.height"
     />
     <LoadingAnimation v-show="showSpinner" />
+    <!-- <CursorOptions
+      :top="quickInfoPositionTop"
+      :left="quickInfoPositionLeft"
+      :trigger="showOptionsSelector"
+      @clicked-info="showOptionsSelector = false"
+      @clicked-VT="showOptionsSelector = false"
+    /> -->
   </div>
 </template>
 
@@ -24,6 +31,22 @@
 import BabylonApp from "@b";
 import handleResize from "./methods/resize";
 import LoadingAnimation from "./components/LoadingAnimation.vue";
+// import CursorOptions from "./components/CursorOptions.vue";
+
+Number.prototype.mapTo0to1 = function (from, to) {
+  let result;
+
+  if (from < to) {
+    let inputRange = to - from;
+    let segment = 1 / inputRange;
+    result = (this - from) * segment;
+  } else {
+    let inputRange = from - to;
+    let segment = 1 / inputRange;
+    result = (from - this) * segment;
+  }
+  return Math.min(1, Math.max(0, result));
+};
 
 export default {
   name: "App",
@@ -33,8 +56,11 @@ export default {
       iframeLoaded: false,
       showSpinner: false,
       showBackButton: false,
+      showOptionsSelector: false,
       babylonCanvas: null,
       src: "",
+      quickInfoPositionLeft: 0,
+      quickInfoPositionTop: 0,
       canvasSize: {
         width: 800,
         height: 800,
@@ -45,6 +71,7 @@ export default {
   mounted() {
     this.babylonCanvas = this.$refs.babylonCanvas;
 
+    // window.addEventListener("mousemove", this.handleMouseMove);
     window.addEventListener("resize", () => {
       this.canvasSize = handleResize();
     });
@@ -53,83 +80,101 @@ export default {
 
     if (this.babylonCanvas) {
       this.bApp = new BabylonApp(this.babylonCanvas);
+      if (this.bApp) {
+        this.bApp.toggleOptionsSelector = (condition) => {
+          console.log("toggleOptionsSelector", condition);
 
-      this.bApp.sweepInHandler = (target, cameraRotation) => {
-        let cameraRadius0 = 0;
-        let cameraRadiusFinal = 10;
-        let radiusLength;
-        let cameraRadiusN;
-        let value;
+          if (condition == "open") {
+            this.quickInfoPositionLeft = this.bApp._scene.pointerX;
+            this.quickInfoPositionTop = this.bApp._scene.pointerY;
+            this.showOptionsSelector = true;
+          } else {
+            this.showOptionsSelector = false;
+          }
+        };
 
-        let observable = this.bApp._scene.onBeforeRenderObservable.add(
-          (theScene) => {
-            if (this.src == "") {
-              console.log("setUrl");
-              this.src = "http://localhost:91/gold_cc.html";
-              // this.src = "https://tour.renderator.com/gold_cc.html";
-              this.onIframeLoadStart();
-              this.bApp._camera._createAnimations(target, cameraRotation, 10);
-            }
-            if (this.iframeLoaded) {
-              switch (this.bApp._camera.animationStage) {
-                case 1:
-                  this.bApp._camera._positionCameraAnimation();
+        this.bApp.sweepInHandler = (targetMesh) => {
+          let cameraRadius0 = 0;
+          let cameraRadiusFinal = 10;
+          let radiusLength;
+          let cameraRadiusN;
+          let value;
 
-                  break;
-                case 2:
-                  break;
-                case 3:
-                  cameraRadius0 = this.bApp._camera.radius * 0.45;
-                  this.bApp._camera._zoomINCameraAnimation();
+          let observable = this.bApp._scene.onBeforeRenderObservable.add(
+            (theScene) => {
+              // console.log("camRay", this.bApp._camera.getForwardRay());
+              if (this.src == "") {
+                console.log("setUrl");
+                // this.src = "http://localhost:91/gold_cc.html";
+                this.src = "https://tour.renderator.com/gold_cc.html";
+                this.onIframeLoadStart();
+                this.bApp._camera._createAnimations(
+                  targetMesh.meshCenter,
+                  targetMesh.CameraRotation,
+                  cameraRadiusFinal
+                );
+              }
+              if (this.iframeLoaded) {
+                switch (this.bApp._camera.animationStage) {
+                  case 1:
+                    this.bApp._camera._positionCameraAnimation();
 
-                  break;
-                case 4:
-                  radiusLength = cameraRadius0 - cameraRadiusFinal;
-                  cameraRadiusN = this.bApp._camera.radius;
+                    break;
+                  case 2:
+                    break;
+                  case 3:
+                    cameraRadius0 = this.bApp._camera.radius * 0.45;
+                    this.bApp._camera._zoomINCameraAnimation();
 
-                  value = 1 - cameraRadiusN / radiusLength;
+                    break;
+                  case 4:
+                    value = this.bApp._camera.radius.mapTo0to1(
+                      cameraRadius0,
+                      cameraRadiusFinal
+                    );
 
-                  this.iframeStyles = {
-                    transform: `scale(${value})`,
-                    opacity: value,
-                  };
-                  break;
-                case 5:
-                  this.iframeStyles = {
-                    transform: `scale(${1})`,
-                    opacity: 1,
-                  };
-                  break;
-                case 6:
-                  this.bApp._camera._reverseAllCameraAnimation();
+                    this.iframeStyles = {
+                      transform: `scale(${value})`,
+                      opacity: value,
+                    };
+                    break;
+                  case 5:
+                    this.iframeStyles = {
+                      transform: `scale(${1})`,
+                      opacity: 1,
+                    };
+                    break;
+                  case 6:
+                    this.bApp._camera._reverseAllCameraAnimation();
 
-                  break;
-                case 7:
-                  radiusLength = cameraRadius0 - cameraRadiusFinal;
-                  cameraRadiusN = this.bApp._camera.radius;
+                    break;
+                  case 7:
+                    value = this.bApp._camera.radius.mapTo0to1(
+                      cameraRadius0,
+                      cameraRadiusFinal
+                    );
 
-                  value = 1 - cameraRadiusN / radiusLength;
-
-                  this.iframeStyles = {
-                    transform: `scale(${value})`,
-                    opacity: value,
-                  };
-                  break;
-                case 8:
-                  this.iframeStyles = {
-                    transform: `scale(${0})`,
-                    opacity: 0,
-                  };
-                  theScene.onBeforeRenderObservable.remove(observable);
-                  this.bApp._camera.animationStage = 0;
-                  this.src = "";
-                  this.iframeLoaded = false;
-                  break;
+                    this.iframeStyles = {
+                      transform: `scale(${value})`,
+                      opacity: value,
+                    };
+                    break;
+                  case 8:
+                    this.iframeStyles = {
+                      transform: `scale(${0})`,
+                      opacity: 0,
+                    };
+                    theScene.onBeforeRenderObservable.remove(observable);
+                    this.bApp._camera.animationStage = 0;
+                    this.src = "";
+                    this.iframeLoaded = false;
+                    break;
+                }
               }
             }
-          }
-        );
-      };
+          );
+        };
+      }
     }
   },
   methods: {
@@ -151,6 +196,12 @@ export default {
     onIframeUnloaded() {
       console.log("onIframeUnloaded");
       this.iframeLoaded = false;
+    },
+    handleMouseMove(e) {
+      this.quickInfoPositionLeft = e.pageX;
+      this.quickInfoPositionTop = e.pageY;
+      // this.quickInfoPositionLeft = e.offsetX;
+      // this.quickInfoPositionTop = e.offsetY;
     },
   },
 };
