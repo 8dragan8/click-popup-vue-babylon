@@ -121,6 +121,7 @@ export default class MainArcCamera extends ArcRotateCamera {
 
   _positionCameraAnimation() {
     console.log("_positionCameraAnimation", this.animationStage);
+    let engine = this.getEngine();
 
     this.animationStage = 2;
     let animatable2 = this._scene.beginDirectAnimation(
@@ -132,7 +133,28 @@ export default class MainArcCamera extends ArcRotateCamera {
       SPEED_RATIO
     );
     animatable2.pause();
-    new MotionBlurPostProcess("mb", this._scene, 1.0, this);
+    console.log(
+      "🚀 ~ file: MainArcCamera.js ~ line 139 ~ MainArcCamera ~ _positionCameraAnimation ~ engine",
+      engine
+    );
+    new MotionBlurPostProcess(
+      "mb",
+      this._scene,
+      1,
+      this,
+      // @param samplingMode — The sampling mode to be used when computing the pass. (default: 0)
+      0,
+      // @param engine — The engine which the post process will be applied. (default: current engine)
+      engine,
+      // @param reusable — If the post process can be reused on the same frame. (default: false)
+      false,
+      // @param textureType — Type of textures used when performing the post process. (default: 0)
+      0,
+      // @param blockCompilation — If compilation of the shader should not be done in the constructor. The updateEffect method can be used to compile the shader at a later time. (default: true)
+      true,
+      // @param forceGeometryBuffer — If this post process should use geometry buffer instead of prepass (default: false)
+      false
+    );
     this.detachControl();
     animatable2.restart();
 

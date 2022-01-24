@@ -31,6 +31,8 @@
 import BabylonApp from "@b";
 import handleResize from "./methods/resize";
 import LoadingAnimation from "./components/LoadingAnimation.vue";
+import AnimateRadians from "@b/animations/AnimateRadians";
+
 // import CursorOptions from "./components/CursorOptions.vue";
 
 Number.prototype.mapTo0to1 = function (from, to) {
@@ -81,6 +83,19 @@ export default {
     if (this.babylonCanvas) {
       this.bApp = new BabylonApp(this.babylonCanvas);
       if (this.bApp) {
+        let animateFloat = new AnimateRadians({
+          duration: 1,
+          from: this.bApp._camera.alpha,
+          to: 1.7,
+          fps: 60,
+        });
+        console.log(
+          "🚀 ~ file: App.vue ~ line 92 ~ mounted ~ animateFloat",
+          animateFloat
+        );
+        // this.bApp._scene.onBeforeRenderObservable.add((theScene) => {
+        //   console.log("camera alpha", theScene.activeCamera.alpha);
+        // });
         this.bApp.toggleOptionsSelector = (condition) => {
           console.log("toggleOptionsSelector", condition);
 
@@ -253,6 +268,7 @@ canvas {
     transform: scale(0);
     pointer-events: all;
     opacity: 0;
+    border: none;
   }
 }
 @keyframes scaleUP {

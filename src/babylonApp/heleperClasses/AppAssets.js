@@ -3,7 +3,8 @@ import { AssetsManager, MeshAssetTask } from "@babylonjs/core/Legacy/legacy";
 export class AppAssets extends AssetsManager {
   constructor(scene) {
     super(scene);
-    this._modelUrl = "/3dModels/Louvre_just_object.glb";
+    // this._modelUrl = "/3dModels/Louvre_just_object.glb";
+    this._modelUrl = "/3dModels/LUMEN_Heleel_DC_V24.glb";
 
     this._glbTask = new MeshAssetTask("glbTask", "", this._modelUrl);
     this._tasks.push(this._glbTask);
